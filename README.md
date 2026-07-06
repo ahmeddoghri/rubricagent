@@ -2,6 +2,7 @@
 
 **Self-evolving rubrics for evaluating LLM-agent skill-use.**
 
+![CI](https://github.com/ahmeddoghri/rubricagent/actions/workflows/ci.yml/badge.svg)
 ![tests](https://img.shields.io/badge/tests-6%20passing-brightgreen)
 ![python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![deps](https://img.shields.io/badge/runtime%20deps-none-success)
@@ -55,6 +56,13 @@ proxy, so you can grade cheaply and at scale.
 ```bash
 git clone https://github.com/ahmeddoghri/rubricagent
 cd rubricagent && pip install -e .
+```
+
+Or with Docker:
+
+```bash
+docker build -t rubricagent .
+docker run --rm rubricagent
 ```
 
 ## Grade a trace
