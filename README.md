@@ -127,6 +127,12 @@ Judge(rubric, grader=LLMGrader())
 pip install pytest && pytest -q      # 6 passing
 ```
 
+## More in this series
+
+Nine small, dependency-light, benchmarked tools for LLM/ML infrastructure — each reproduces its headline number locally with no API keys:
+
+[agentmem](https://github.com/ahmeddoghri/agentmem) · [clarifyrag](https://github.com/ahmeddoghri/clarifyrag) · [churnfm](https://github.com/ahmeddoghri/churnfm) · [citebench](https://github.com/ahmeddoghri/citebench) · [guardrail-gate](https://github.com/ahmeddoghri/guardrail-gate) · [tablextract](https://github.com/ahmeddoghri/tablextract) · [vllm-cost-router](https://github.com/ahmeddoghri/vllm-cost-router) · [taggate](https://github.com/ahmeddoghri/taggate)
+
 ## License
 
 MIT © Ahmed Doghri
