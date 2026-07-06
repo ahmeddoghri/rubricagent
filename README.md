@@ -8,6 +8,10 @@
 ![deps](https://img.shields.io/badge/runtime%20deps-none-success)
 ![license](https://img.shields.io/badge/license-MIT-black)
 
+> **Learn your LLM-as-judge rubric from outcomes instead of guessing it.** In
+> the benchmark, rubric quality (AUC vs. ground truth) climbs **0.77 → 1.00**
+> as it prunes dead criteria and grows new ones. `python -m rubricagent.eval`.
+
 Everyone writes an LLM-as-judge rubric by hand and then trusts it forever. But a
 hand-written rubric is just a *guess* about what good agent behaviour looks like —
 and most of its criteria turn out to carry no signal, while some are actively
