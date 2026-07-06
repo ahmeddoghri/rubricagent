@@ -7,11 +7,11 @@
 >>> 0 <= j.total <= 1
 True
 """
-from .rubric import Criterion, Rubric, starter_rubric
-from .judge import Trace, CriterionScore, Judgment, Judge, HeuristicGrader
-from .evolve import RubricEvolver, EvolutionReport
-from .report import scorecard
+from .evolve import EvolutionReport, RubricEvolver
+from .judge import CriterionScore, HeuristicGrader, Judge, Judgment, Trace
 from .metrics import auc, pearson
+from .report import scorecard
+from .rubric import Criterion, Rubric, starter_rubric
 
 __all__ = [
     "Criterion", "Rubric", "starter_rubric",

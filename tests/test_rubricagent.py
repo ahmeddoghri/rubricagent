@@ -1,4 +1,4 @@
-from rubricagent import Trace, Judge, starter_rubric, RubricEvolver, scorecard
+from rubricagent import Judge, RubricEvolver, Trace, scorecard, starter_rubric
 from rubricagent.eval import generate_dataset
 from rubricagent.metrics import auc, pearson
 

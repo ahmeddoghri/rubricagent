@@ -1,7 +1,7 @@
 """Grade a trace, then evolve the rubric on a labeled batch.
 Run: python examples/quickstart.py
 """
-from rubricagent import Trace, Judge, starter_rubric, RubricEvolver, scorecard
+from rubricagent import Judge, RubricEvolver, Trace, scorecard, starter_rubric
 from rubricagent.eval import generate_dataset
 
 # 1. Grade a single agent trace against a starter rubric
