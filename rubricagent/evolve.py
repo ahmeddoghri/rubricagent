@@ -9,10 +9,9 @@ rubric to match reality:
 3. **Discover** a new criterion from evidence terms that are common in
    successful traces but rare in failed ones.
 
-This is the SkillCoach idea — rubrics that improve themselves from feedback —
-and the improvement is measured with a PACE-style proxy: the AUC with which the
-aggregate rubric score separates good runs from bad. A better rubric is a better
-*proxy* for capability, so you can grade cheaply at scale.
+The improvement is measured with a proxy metric: the AUC with which the
+aggregate rubric score separates good runs from bad. A better rubric is a
+better *proxy* for capability, so you can grade cheaply at scale.
 """
 from __future__ import annotations
 

@@ -32,7 +32,7 @@ def generate_dataset(n: int = 200, seed: int = 0):
     ``correctness`` and ``completeness`` markers appear at random regardless of
     outcome (distractors), ``clarity`` is mildly anti-correlated, and
     ``relevance`` is constant. A flat equal-weight rubric therefore buries the
-    one real signal under four useless criteria — exactly the situation the
+    one real signal under four useless criteria, exactly the situation the
     evolver is meant to fix.
     """
     rng = random.Random(seed)

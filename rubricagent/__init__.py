@@ -1,4 +1,4 @@
-"""RubricAgent — self-evolving rubrics for evaluating LLM-agent skill-use.
+"""RubricAgent, self-evolving rubrics for evaluating LLM-agent skill-use.
 
 >>> from rubricagent import Trace, Judge, starter_rubric
 >>> r = starter_rubric("summarize the risks")
