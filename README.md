@@ -8,30 +8,33 @@
 ![deps](https://img.shields.io/badge/runtime%20deps-none-success)
 ![license](https://img.shields.io/badge/license-MIT-black)
 
-> **Learn your LLM-as-judge rubric from outcomes instead of guessing it.** In
-> the benchmark, rubric quality (AUC vs. ground truth) climbs **0.77 → 1.00**
-> as it prunes dead criteria and grows new ones. `python -m rubricagent.eval`.
+> **Learn your LLM-as-judge rubric from outcomes instead of guessing it.**
+> In the benchmark, rubric quality (AUC vs. ground truth) climbs
+> **0.77 → 1.00** as it prunes dead criteria and grows new ones.
+> `python -m rubricagent.eval`.
 
-Everyone writes an LLM-as-judge rubric by hand and then trusts it forever. But a
-hand-written rubric is just a *guess* about what good agent behaviour looks like —
-and most of its criteria turn out to carry no signal, while some are actively
-misleading. RubricAgent treats the rubric as something to **learn**: score your
-agent traces, correlate each criterion against real outcomes, then **reweight,
-prune, and grow** the rubric so it becomes a better proxy for capability.
+Somebody on your team wrote a five-criteria rubric for grading agent
+transcripts, everyone nodded, and it's been treated as gospel ever since.
+Nobody has checked whether all five criteria actually predict anything.
+Spoiler from our own benchmark below: "clarity" was actively anti-correlated
+with success. The rubric was penalizing the agent for being clear.
+
+RubricAgent treats the rubric as something you learn, not something you
+write once and defend forever. Score your agent traces, correlate each
+criterion against real outcomes, then **reweight, prune, and grow** the
+rubric so it becomes an honest proxy for capability instead of a vibe check
+with a scoring column.
 
 Runs with **zero dependencies and zero API keys** (deterministic heuristic
-grader + pure-stdlib stats). Swap in an LLM grader for production judging.
-
-> **Inspired by the mid-2026 agent-evaluation literature:**
-> - *SkillCoach: Self-Evolving Rubrics for Evaluating and Enhancing Agentic Skill-Use* (2026).
-> - *PACE: A Proxy for Agentic Capability Evaluation* (2026) — cheap proxies that track true agent capability.
+grader plus pure-stdlib stats). Swap in an LLM grader when you're ready to
+judge for real.
 
 ---
 
 ## The result in one number
 
-Give a flat, equal-weight rubric where only one of five criteria actually
-predicts success (the rest are noise or misleading). One evolution pass:
+Start with a flat, equal-weight rubric where only one of five criteria
+actually predicts success. The rest are noise, or worse:
 
 ```bash
 python -m rubricagent.eval --n 200
@@ -42,18 +45,19 @@ AUC (evolved rubric) = 1.000
 improvement          = +0.226
 
 criterion correlations with success:
-  grounding      +1.000     ← the real signal, found and up-weighted
+  grounding      +1.000     the real signal, found and up-weighted
   completeness   +0.100
   correctness    +0.036
   relevance      +0.000
-  clarity        -0.269     ← misleading, pruned
+  clarity        -0.269     misleading. pruned on sight.
 pruned : ['relevance', 'correctness', 'clarity']
 discovered: discovered_signal
 ```
 
-AUC here is a **PACE-style proxy**: how well the aggregate rubric score separates
-runs that truly succeeded from those that failed. A better rubric is a better
-proxy, so you can grade cheaply and at scale.
+AUC here is a proxy: how well the aggregate rubric score separates traces
+that truly succeeded from the ones that didn't. A better rubric is a better
+proxy, which means you can grade cheaply and at scale without lying to
+yourself about quality.
 
 ## Install
 
@@ -81,20 +85,28 @@ print(scorecard(Judge(rubric).judge(trace)))
 ```
 ```
 ### Scorecard
-**Total: 78%**
+Total: 14%
+
 | Criterion | Score | Rationale |
 |---|---|---|
-| grounding | `████████░░` 80% | matched 4/5 evidence terms: [source, according, tool, found] |
-| correctness | `██████░░░░` 60% | matched 3/5 evidence terms: [because, therefore, correct] |
-...
+| relevance | 0% | matched 0/5 evidence terms: [] |
+| correctness | 20% | matched 1/5 evidence terms: ['therefore'] |
+| completeness | 0% | matched 0/6 evidence terms: [] |
+| grounding | 50% | matched 3/6 evidence terms: ['source', 'according', 'found'] |
+| clarity | 0% | matched 0/3 evidence terms: [] |
 ```
+
+Yes, a real trace scores 14%. This is a heuristic grader running on a
+deliberately thin, half-finished example response ("... therefore ...").
+That's the point. It's not going to flatter you into thinking the demo is
+smarter than it is.
 
 ## Evolve the rubric from feedback
 
 ```python
 from rubricagent import RubricEvolver
 
-# traces you've already run, with a 0/1 label = did the agent actually succeed?
+# traces you've already run, with a 0/1 label: did the agent actually succeed?
 evolved, report = RubricEvolver().evolve(rubric, traces, labels)
 
 print(report.auc_before, "->", report.auc_after)   # proxy quality went up
@@ -104,15 +116,16 @@ print(evolved.names())                               # the rubric that survived
 
 **What one pass does**
 
-1. **Reweight** — every criterion's weight becomes its correlation with success.
-2. **Prune** — criteria below a signal floor are dropped (incl. anti-signals).
-3. **Discover** — a new criterion is minted from evidence terms that are common
-   in wins and rare in losses.
+1. **Reweight.** Every criterion's weight becomes its correlation with success.
+2. **Prune.** Criteria below a signal floor get dropped, anti-signals first.
+3. **Discover.** A new criterion gets minted from evidence terms that show up
+   constantly in wins and rarely in losses.
 
 ## Bring your own judge
 
-`HeuristicGrader` is offline and deterministic. Any object with
-`grade(criterion, trace) -> CriterionScore` works — wrap your LLM there:
+`HeuristicGrader` is offline and deterministic, which is great for CI and
+useless for nuance. Any object with `grade(criterion, trace) -> CriterionScore`
+works. Wrap your LLM there when you want the real thing:
 
 ```python
 class LLMGrader:
@@ -129,7 +142,7 @@ pip install pytest && pytest -q      # 6 passing
 
 ## More in this series
 
-Nine small, dependency-light, benchmarked tools for LLM/ML infrastructure — each reproduces its headline number locally with no API keys:
+Nine small, dependency-light, benchmarked tools for LLM/ML infrastructure. Each one reproduces its headline number locally with no API keys:
 
 [agentmem](https://github.com/ahmeddoghri/agentmem) · [clarifyrag](https://github.com/ahmeddoghri/clarifyrag) · [churnfm](https://github.com/ahmeddoghri/churnfm) · [citebench](https://github.com/ahmeddoghri/citebench) · [guardrail-gate](https://github.com/ahmeddoghri/guardrail-gate) · [tablextract](https://github.com/ahmeddoghri/tablextract) · [vllm-cost-router](https://github.com/ahmeddoghri/vllm-cost-router) · [taggate](https://github.com/ahmeddoghri/taggate)
 

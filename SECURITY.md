@@ -19,7 +19,8 @@ remain anonymous.
 
 ## Scope notes
 
-`rubricagent` is a pure-stdlib library with no runtime dependencies and makes no
-network calls on its own. When you plug in your own model, embedding, or
-storage backend, that component's security posture is your responsibility —
-validate and sanitize any untrusted text you feed through the library.
+`rubricagent` is a pure-stdlib library with no runtime dependencies and makes
+no network calls on its own, so the attack surface starts at zero. When you
+plug in your own model, embedding, or storage backend, that component's
+security posture is your responsibility. Validate and sanitize any untrusted
+text you feed through the library, same as anywhere else.
