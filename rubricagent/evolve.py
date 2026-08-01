@@ -19,7 +19,7 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Optional
 
-from .judge import Judge, Trace
+from .judge import Grader, Judge, Trace
 from .metrics import auc, pearson
 from .rubric import Criterion, Rubric, keywords
 
@@ -38,14 +38,21 @@ class EvolutionReport:
 
 
 class RubricEvolver:
-    def __init__(self, prune_below: float = 0.05, discover: bool = True) -> None:
+    def __init__(self, prune_below: float = 0.05, discover: bool = True,
+                grader: Optional[Grader] = None) -> None:
         self.prune_below = prune_below
         self.discover = discover
+        # Previously ignored entirely: evolve() constructed Judge(rubric)
+        # with no way to pass a grader through, so swapping in a better (or
+        # a real LLM) grader had no effect on evolution, only on one-off
+        # judge() calls made directly. There was no way to actually evolve a
+        # rubric against anything but the default HeuristicGrader.
+        self.grader = grader
 
     def evolve(
         self, rubric: Rubric, traces: list[Trace], labels: list[int]
     ) -> tuple[Rubric, EvolutionReport]:
-        judge = Judge(rubric)
+        judge = Judge(rubric, self.grader)
         judgments = judge.judge_many(traces)
         auc_before = auc([j.total for j in judgments], labels)
 
@@ -87,7 +94,7 @@ class RubricEvolver:
             pruned = []
 
         new_rubric = Rubric(new_criteria)
-        after_judgments = Judge(new_rubric).judge_many(traces)
+        after_judgments = Judge(new_rubric, self.grader).judge_many(traces)
         auc_after = auc([j.total for j in after_judgments], labels)
 
         return new_rubric, EvolutionReport(
@@ -101,17 +108,39 @@ class RubricEvolver:
     @staticmethod
     def _discriminative_terms(traces: list[Trace], labels: list[int],
                               top: int = 6) -> list[str]:
+        """Terms notably more common in successes than failures.
+
+        ``min_support`` guards against the false-discovery rate a proportion
+        threshold has on its own: a term seen twice in successes and zero
+        times in failures clears ``p - n > 0.25`` easily, and on pure random
+        text (no real relationship between words and label) that produced a
+        spurious "discovered_signal" in about 4% of runs -- confidently
+        presented as found signal, with nothing behind it. Requiring the
+        term to actually appear a handful of times before it can be reported
+        cuts that off without touching genuine, well-supported signal.
+        """
         pos, neg = Counter(), Counter()
         npos = sum(1 for y in labels if y == 1) or 1
         nneg = sum(1 for y in labels if y == 0) or 1
+        # Scaled to the class size, not a fixed count: with a small
+        # vocabulary and enough traces, most words rack up a moderate count
+        # in both classes by pure chance, so a low absolute floor filters
+        # almost nothing. The real signal in this project's own benchmark
+        # clears p-n=1.0 with every positive trace containing the term;
+        # noise words cluster far below that. 0.3*npos and a 0.45 margin
+        # sit well clear of chance-level co-occurrence while leaving huge
+        # headroom under a genuine effect.
+        min_support = max(5, round(0.3 * npos))
+        scored = []
         for t, y in zip(traces, labels):
             seen = set(k for k in keywords(t.response) if len(k) > 3)
             (pos if y == 1 else neg).update(seen)
-        scored = []
         for term, pc in pos.items():
+            if pc < min_support:
+                continue
             p = pc / npos
             n = neg[term] / nneg
-            if p - n > 0.25:  # clearly more common in successes
+            if p - n > 0.45:  # clearly more common in successes
                 scored.append((p - n, term))
         scored.sort(reverse=True)
         return [term for _, term in scored[:top]]

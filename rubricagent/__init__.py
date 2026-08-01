@@ -9,6 +9,7 @@ True
 """
 from .evolve import EvolutionReport, RubricEvolver
 from .judge import CriterionScore, HeuristicGrader, Judge, Judgment, Trace
+from .judge_v2 import HeuristicGraderV2
 from .metrics import auc, pearson
 from .report import scorecard
 from .rubric import Criterion, Rubric, starter_rubric
@@ -16,6 +17,7 @@ from .rubric import Criterion, Rubric, starter_rubric
 __all__ = [
     "Criterion", "Rubric", "starter_rubric",
     "Trace", "CriterionScore", "Judgment", "Judge", "HeuristicGrader",
+    "HeuristicGraderV2",
     "RubricEvolver", "EvolutionReport",
     "scorecard", "auc", "pearson",
 ]

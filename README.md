@@ -3,7 +3,7 @@
 **Self-evolving rubrics for evaluating LLM-agent skill-use.**
 
 ![CI](https://github.com/ahmeddoghri/rubricagent/actions/workflows/ci.yml/badge.svg)
-![tests](https://img.shields.io/badge/tests-6%20passing-brightgreen)
+![tests](https://img.shields.io/badge/tests-21%20passing-brightgreen)
 ![python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![deps](https://img.shields.io/badge/runtime%20deps-none-success)
 ![license](https://img.shields.io/badge/license-MIT-black)
@@ -12,6 +12,13 @@
 > In the benchmark, rubric quality (AUC vs. ground truth) climbs
 > **0.77 → 1.00** as it prunes dead criteria and grows new ones.
 > `python -m rubricagent.eval`.
+>
+> The benchmark's own traces were built from the grader's keyword list:
+> the grounding marker string contains 5 of the 6 words the grounding
+> criterion searches for. On ordinary language, that criterion's
+> correlation with the true label is **0.000**, not weak, blind.
+> `python -m rubricagent.eval_v2` is the benchmark that found it, and a
+> wider-vocabulary grader that gets it to 0.88.
 
 Somebody on your team wrote a five-criteria rubric for grading agent
 transcripts, everyone nodded, and it's been treated as gospel ever since.
@@ -58,6 +65,78 @@ AUC here is a proxy: how well the aggregate rubric score separates traces
 that truly succeeded from the ones that didn't. A better rubric is a better
 proxy, which means you can grade cheaply and at scale without lying to
 yourself about quality.
+
+## The dataset was built from the grader's own keyword list
+
+Look at how the benchmark generates its "grounding" examples versus what the
+grounding criterion searches for:
+
+```python
+# rubric.py
+Criterion("grounding", ..., ["source", "cite", "according", "tool", "search", "found"])
+
+# eval.py
+_GROUND = "according to the source the tool search found evidence"
+```
+
+Five of six keywords, verbatim, in the marker string that decides the label.
+The 0.774 -> 1.000 climb measures whether keyword-overlap scoring can detect
+data built from keyword overlap. It says nothing about whether the grader
+can read a transcript that doesn't announce its own groundedness in those
+exact words, which is every transcript that has ever existed.
+
+```bash
+python -m rubricagent.eval_v2
+```
+```
+Does the grounding criterion actually see grounding?
+corpus / grader       AUC before   AUC after  grounding corr
+adversarial / v1           0.639       0.944           0.000
+adversarial / v2           0.944       1.000           0.883
+holdout / v1                0.389       0.667           0.447
+holdout / v2                0.667       1.000           0.834
+```
+
+`grounding corr` is the number that matters here: the starter rubric's own
+grounding criterion's correlation with the true label, before evolution
+touches anything. On ordinary language ("The SEC 10-K filing lists a March
+launch" vs. "I think it probably launches next year"), the original
+criterion correlates at **0.000**. It is not weakly grounded-detecting; it
+is blind. AUC after evolution still climbs to 0.944, which would look fine
+in isolation, because the separate "discover new criterion" mechanism mines
+raw trace text directly and does not depend on the grader at all. The
+criterion the rubric ships with never worked.
+
+`HeuristicGraderV2` widens each criterion's evidence vocabulary (grounding
+goes from 6 words to about 30, covering "filing", "disclosure",
+"transcript", "confirmed", "per", and the rest of how citation actually
+reads) and adds basic stemming, so "cited" and "citing" match "cite". Held
+out and evaluated once, after the vocabulary was frozen against the corpus
+above: correlation 0.447 to 0.834.
+
+`Judge`'s default stays `HeuristicGrader`, unchanged, so the numbers at the
+top of this README keep reproducing exactly. Pass `HeuristicGraderV2()`
+explicitly, to `Judge` or to `RubricEvolver(grader=...)`, to grade on
+vocabulary that generalizes past this project's own synthetic catalog.
+
+### A second bug this surfaced: evolve() ignored any grader you gave it
+
+`RubricEvolver.evolve()` constructed `Judge(rubric)` with no grader argument,
+twice, regardless of what was passed to `RubricEvolver(grader=...)`. There
+was no way to actually evolve a rubric against `HeuristicGraderV2`, or a real
+LLM grader, only to call `judge()` once with it. Fixed: the grader you
+configure is now the one evolution actually uses.
+
+### A third: the "discover new criterion" step could hallucinate
+
+Signal is judged by a bare proportion gap (`p - n > 0.25`) with no minimum
+sample size. On text where the label is a pure coin flip, unrelated to any
+word in it, that produced a confidently-reported "discovered_signal" backed
+by nothing in about 1 run in 25. Requiring the term to actually appear in a
+real share of the successful traces, not just clear a small proportion gap
+that a handful of coincidental hits satisfies, brought that to 0 in 200
+trials without weakening the real discovery this project's own benchmark
+depends on (still fires, same AUC).
 
 ## Install
 
