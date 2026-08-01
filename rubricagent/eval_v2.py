@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, Optional, Sequence
 
 from .adversarial import ADVERSARIAL_TRACES, HOLDOUT_TRACES, LabeledTrace
 from .evolve import RubricEvolver

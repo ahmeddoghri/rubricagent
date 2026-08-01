@@ -19,7 +19,6 @@ from rubricagent.judge import HeuristicGrader, Trace
 from rubricagent.judge_v2 import HeuristicGraderV2, stem
 from rubricagent.rubric import starter_rubric
 
-
 # --- the finding: the grounding grader is blind to real text ---------------
 
 def test_original_grader_scores_zero_on_every_grounded_trace():

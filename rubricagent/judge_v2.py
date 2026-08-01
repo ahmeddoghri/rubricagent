@@ -23,7 +23,6 @@ series so far.
 from __future__ import annotations
 
 import re
-from typing import Sequence
 
 from .judge import CriterionScore, Trace
 from .rubric import Criterion
