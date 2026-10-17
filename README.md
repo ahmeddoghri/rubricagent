@@ -2,10 +2,13 @@
 
 **Self-evolving rubrics for evaluating LLM-agent skill-use.**
 
-![tests](https://img.shields.io/badge/tests-21%20passing-brightgreen)
+[![tests](https://github.com/ahmeddoghri/rubricagent/actions/workflows/tests.yml/badge.svg)](https://github.com/ahmeddoghri/rubricagent/actions/workflows/tests.yml)
 ![python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![deps](https://img.shields.io/badge/runtime%20deps-none-success)
 ![license](https://img.shields.io/badge/license-MIT-black)
+[![case study](https://img.shields.io/badge/case%20study-adoghri.com-e0703e)](https://adoghri.com/project-11.html)
+
+![rubricagent](docs/cover.jpg)
 
 > **Learn your LLM-as-judge rubric from outcomes instead of guessing it.**
 > In the benchmark, rubric quality (AUC vs. ground truth) climbs
@@ -215,7 +218,7 @@ Judge(rubric, grader=LLMGrader())
 ## Tests
 
 ```bash
-pip install pytest && pytest -q      # 6 passing
+pip install pytest && pytest -q      # 21 passing
 ```
 
 ## More in this series
