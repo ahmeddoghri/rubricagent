@@ -1,4 +1,4 @@
-# 📊 RubricAgent
+# rubricagent
 
 **Self-evolving rubrics for evaluating LLM-agent skill-use.**
 
@@ -28,7 +28,7 @@ Nobody has checked whether all five criteria actually predict anything.
 Spoiler from our own benchmark below: "clarity" was actively anti-correlated
 with success. The rubric was penalizing the agent for being clear.
 
-RubricAgent treats the rubric as something you learn, not something you
+rubricagent treats the rubric as something you learn, not something you
 write once and defend forever. Score your agent traces, correlate each
 criterion against real outcomes, then **reweight, prune, and grow** the
 rubric so it becomes an honest proxy for capability instead of a vibe check
@@ -166,15 +166,15 @@ print(scorecard(Judge(rubric).judge(trace)))
 ```
 ```
 ### Scorecard
-Total: 14%
+**Total: 14%**
 
 | Criterion | Score | Rationale |
 |---|---|---|
-| relevance | 0% | matched 0/5 evidence terms: [] |
-| correctness | 20% | matched 1/5 evidence terms: ['therefore'] |
-| completeness | 0% | matched 0/6 evidence terms: [] |
-| grounding | 50% | matched 3/6 evidence terms: ['source', 'according', 'found'] |
-| clarity | 0% | matched 0/3 evidence terms: [] |
+| relevance | `░░░░░░░░░░` 0% | matched 0/5 evidence terms: [] |
+| correctness | `██░░░░░░░░` 20% | matched 1/5 evidence terms: ['therefore'] |
+| completeness | `░░░░░░░░░░` 0% | matched 0/6 evidence terms: [] |
+| grounding | `█████░░░░░` 50% | matched 3/6 evidence terms: ['source', 'according', 'found'] |
+| clarity | `░░░░░░░░░░` 0% | matched 0/3 evidence terms: [] |
 ```
 
 Yes, a real trace scores 14%. This is a heuristic grader running on a
